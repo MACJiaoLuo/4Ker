@@ -4,7 +4,6 @@
 # Copyright (C) 2019 KFERMercer <KFER.Mercer@gmail.com>
 # 
 # <https://github.com/KFERMercer/OpenWrt-CI>
-# Narizgnaw：非常感谢KFERMercer大佬提供的OpenWrt-CI。
 
 name: openwrt 
 
@@ -13,7 +12,7 @@ on:
     branches: 
       - master
   schedule:
-      - cron: 0 16 * * *
+      - cron: 0 24 * * *
   release:
       types: [published]
 
@@ -145,22 +144,22 @@ jobs:
           
           sed -i 's/^[ \t]*//g' ./.config
           make defconfig
-      - name: Make download
+      - name: 下载编译所需源码
         run: |
           make download -j8
           find dl -size -1024c -exec ls -l {} \;
           find dl -size -1024c -exec rm -f {} \;
-      - name: Compile firmware
+      - name: 进行固件编译
         run: |
           echo -e "$(nproc) thread build."
           make -j$(nproc) V=s
-      - name: Assemble artifact
+      - name: 清理不必要的文件
         run: |
           rm -rf ./artifact/
           mkdir -p ./artifact/
           find ./bin/targets/ -name "*combined*img*" | xargs -i mv -f {} ./artifact/
           find ./bin/targets/ -name "*sysupgrade*bin*" | xargs -i mv -f {} ./artifact/
-      - name: Upload artifact
+      - name: 上传固件
         uses: actions/upload-artifact@master
         with:
           name: OpenWrt firmware
